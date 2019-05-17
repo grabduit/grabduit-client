@@ -58,7 +58,7 @@ export default {
   },
   created() {
     console.log(db);
-    if(localStorage.getItem('playerId')){
+    if(!localStorage.getItem('playerId')){
       this.$router.push(`/home`)
     }
     db.collection("rooms").onSnapshot(querySnapshot => {

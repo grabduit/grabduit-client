@@ -5,15 +5,16 @@
         class="row grab"
         v-model="sandbox"
         @remove="send"
+        @change="updateSandbox"
         :group="{name: 'money', pull: 'clone', put: false}"
-        
       >
         <b-col sm="1" v-for="(item, index) in sandbox" :key="index" class="p-1">
           <b-img :src="require(`@/assets/duit/${item}.png`)" fluid/>
         </b-col>
       </draggable>
     </div>
-    <div class="bawah"> <!-- style="display: flex; justify-content: center;" -->
+    <div class="bawah">
+      <!-- style="display: flex; justify-content: center;" -->
       <div class="big-bucket">
         <draggable
           v-model="bucket"
@@ -30,7 +31,9 @@
       <div class="small-bucket">
         <div v-for="(item, index) in rivals" :key="index" class="sb-personal">
           <p class="counter">
-            {{item.name}}<br>{{item.total}}
+            {{item.name}}
+            <br>
+            {{item.totalDuit}}
           </p>
         </div>
       </div>
@@ -39,7 +42,8 @@
 </template>
 <script>
 import draggable from "vuedraggable";
-import { db } from "@/main.js"
+import { db } from "@/main.js";
+import { mapState } from 'vuex'
 
 export default {
   data() {
@@ -48,27 +52,25 @@ export default {
       sandbox: [],
       bucket: [],
       total: 0,
-      rivals: [
-        {
-          id: '2',
-          name: 'doni',
-          total: 20,
-        }, {
-          id: '3',
-          name: 'yona',
-          total: 10
-        }, {
-          id: '4',
-          name: 'ucup',
-          total: 30,
-        }
-      ]
+      rivals: [],
+      tempData: {}
     };
   },
+  computed: mapState(['audio'])
+  ,
   components: {
     draggable
   },
   methods: {
+    updateSandbox(event) {
+      console.log(event);
+      let { moved } = event;
+      if (moved) {
+        db.collection("rooms")
+          .doc(this.$route.params.id)
+          .update({ sandbox: this.sandbox });
+      }
+    },
     send(event) {
       // console.log({ event, dari: 'send' });
       // console.log(this.sandbox)
@@ -80,32 +82,113 @@ export default {
         // console.log("catch error")
       }
       // console.log(this.sandbox)
-      db.collection('rooms').doc(this.$router.params.id)
-        .update({ sandbox: this.sandbox })
-      if(this.clearCheck()) {
-        // ======================= kalo udah kosong ngapain ? =======================
-        swal('finished')
-        
-      } else {
-        // ======================== kalo masih isi ngapain ? ========================
-      }
+      db.collection("rooms")
+        .doc(this.$route.params.id)
+        .update({ sandbox: this.sandbox });
+      // if (this.clearCheck()) {
+      //   // ======================= kalo udah kosong ngapain ? =======================
+
+      //   swal("finished");
+      // } else {
+      //   // ======================== kalo masih isi ngapain ? ========================
+      // }
     },
     receive(event) {
+      this.audio.play();
       let { added, removed, moved } = event;
       let tempValue = added ? added.element : removed ? removed.element : 0;
       this.total += tempValue;
-      let kirim = {...rivals, }
-      db.collection('rooms').doc(this.$router.params.id)
-        .update({ sandbox: kirim })
+      let kirim = {
+        playerId: localStorage.playerId,
+        name: localStorage.name,
+        totalDuit: this.total
+      };
+      // for (let rival of rivals) {
+      //   kirim[rival.id] = rival;
+      // }
+      db.collection("rooms")
+        .doc(this.$route.params.id)
+        .update({ ["players." + localStorage.playerId]: kirim });
     },
     clearCheck() {
-      let check = true
+      // let check = true
+      // this.sandbox.forEach(item => {
+      //   if(item != 0) {
+      //     check = false
+      //   }
+      // });
+      // return check
+    }
+  },
+  watch: {
+    sandbox() {
+      let check = true;
       this.sandbox.forEach(item => {
-        if(item != 0) {
-          check = false
-        }
+        if (item != 0) check = false;
       });
-      return check
+      if (check) {
+        let highest = {
+          playerId: "",
+          totalDuit: 0
+        };
+        for (let key in this.tempData.players) {
+          console.log(this.tempData.players[key]);
+          if (this.tempData.players[key].totalDuit > highest.totalDuit) {
+            highest.totalDuit = this.tempData.players[key].totalDuit;
+            highest.playerId = this.tempData.players[key].playerId;
+          }
+        }
+        console.log(`${highest.playerId} , ${localStorage.playerId}`);
+        if (localStorage.playerId === this.tempData.creator) {
+          if (highest.playerId == localStorage.playerId) {
+            // swal("menang!", "uhuy~!", "success");
+            swal({
+              title: "Menang!",
+              text: "Play again?",
+              icon: "success",
+              buttons: ["No!", true]
+            }).then(clicked => {
+              if (clicked) {
+                // restart
+                this.$router.push(`/games/${this.$router.params.id}`);
+              } else {
+                // berenti
+                db.collection("rooms")
+                  .doc(this.$router.params.id)
+                  .update({
+                    status: "ready"
+                  });
+              }
+            });
+          } else {
+            // swal("Kalah... :(", "huhuhu~", "error");
+            swal({
+              title: "Kalah!",
+              text: "Play again?",
+              icon: "error",
+              buttons: ["No!", true]
+            }).then(clicked => {
+              if (clicked) {
+                // restart
+                this.$router.push(`/games/${this.$router.params.id}`);
+              } else {
+                // berenti
+                db.collection("rooms")
+                  .doc(this.$router.params.id)
+                  .update({
+                    status: "ready"
+                  });
+              }
+            });
+          }
+        } else {
+          if (highest.playerId == localStorage.playerId) {
+            swal("menang!", "uhuy~!", "success");
+          } else {
+            swal("Kalah... :(", "huhuhu~", "error");
+          }
+        }
+      }
     }
   },
   created() {
@@ -113,16 +196,34 @@ export default {
       let rand = Math.round(Math.random() * (this.moneyList.length - 1));
       this.sandbox.push(this.moneyList[rand]);
     }
-    db.collection('rooms').doc(this.$router.params.id)
-      .update({ sandbox: this.sandbox});
-    db.collection('rooms').doc(this.$router.params.id)
+    console.log(this.$route.params);
+    db.collection("rooms")
+      .doc(this.$route.params.id)
+      .update({ sandbox: this.sandbox });
+
+    let kirim = {
+      playerId: localStorage.playerId,
+      name: localStorage.name,
+      totalDuit: 0
+    };
+    db.collection("rooms")
+      .doc(this.$route.params.id)
+      .update({ ["players." + localStorage.playerId]: kirim });
+
+    db.collection("rooms")
+      .doc(this.$route.params.id)
       .onSnapshot(doc => {
-        let data = doc.data()
-        this.rivals = Object.values(data.players)
-        this.rivals = this.rivals.filter(item => item.id != localStorage.playerId)
-        this.sandbox = data.sandbox
-        // console.log(this.rivals)
-      })
+        let data = doc.data();
+        this.tempData = data;
+        this.rivals = Object.values(data.players);
+        this.rivals = this.rivals.filter(
+          item => item.id != localStorage.playerId
+        );
+        this.sandbox = data.sandbox;
+        if (data.status == "ready") {
+          this.$router.push("/");
+        }
+      });
   }
 };
 </script>

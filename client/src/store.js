@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -8,6 +9,7 @@ export default new Vuex.Store({
     name: '',
     playerId: '',
     audio: new Audio('./assets/hereMoney.mp3'),
+    audioCacing: new Audio('./assets/ChaChing.mp3'),
   },
   mutations: {
     getUser (state, payload) {

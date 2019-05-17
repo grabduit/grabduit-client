@@ -1,20 +1,22 @@
 <template>
 <div>
-    <b-card v-if="Object.keys(room.players).includes(playerId)" :title='room.title' :sub-title="playerNumbers" style="background-color:#ADFF2F">
-        <b-card-text v-for='(player,index) in players'>
+    <b-card v-if="Object.keys(room.players).includes(playerId)" :title='room.title' :sub-title="room.status" style="background-color:#ADFF2F">
+        {{playerNumbers}}
+        <b-card-text v-for='(player,index) in players' :key="index">
             player{{index+1}}:{{player}} <b v-if="player === room.creator">(admin)</b>
         </b-card-text>
         <button v-if="isAdmin" class='mx-1' @click="start">Start</button>
         <button v-if='available' class='mx-1' @click="join">Join</button>
-        <button class='mx-1' @click="leave">Leave</button>
+        <button class='mx-1'  @click="leave">Leave</button>
     </b-card>
-    <b-card v-else :title='room.title' :sub-title="playerNumbers">
-        <b-card-text v-for='(player,index) in players'>
+    <b-card v-else :title='room.title' :sub-title="room.status">
+        {{playerNumbers}}
+        <b-card-text v-for='(player,index) in players' :key="index">
             player{{index+1}}:{{player}} <b v-if="player === room.creator">(admin)</b>
         </b-card-text>
         <button v-if="isAdmin" class='mx-1' @click="start">Start</button>
         <button v-if='available' class='mx-1' @click="join">Join</button>
-        <button class='mx-1' @click="leave">Leave</button>
+        <button class='mx-1' v-if="Object.keys(room.players).includes(playerId)" @click="leave">Leave</button>
     </b-card>
 </div>
 </template>
@@ -29,6 +31,7 @@ export default{
     data(){
         return{
             playerId:'',
+            playerName:'',
             isAdmin : false
         }
     },
@@ -49,7 +52,8 @@ export default{
             let players= this.room.players
             players[this.playerId] = {
                 totalDuit: 0,
-                playerId: this.playerId
+                playerId: this.playerId,
+                name: this.playerName
             }
             db
                 .collection("rooms")
@@ -106,6 +110,7 @@ export default{
     },
     created(){
         this.playerId = localStorage.getItem('playerId')
+        this.playerName = localStorage.getItem('name')
         console.log(this.playerId)
         if(this.playerId === this.room.creator){
             this.isAdmin=true 

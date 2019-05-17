@@ -80,7 +80,7 @@ export default {
         // console.log("catch error")
       }
       // console.log(this.sandbox)
-      db.collection('rooms').doc(this.$router.params.id)
+      db.collection('rooms').doc(this.$route.params.id)
         .update({ sandbox: this.sandbox })
       if(this.clearCheck()) {
         // ======================= kalo udah kosong ngapain ? =======================
@@ -95,7 +95,7 @@ export default {
       let tempValue = added ? added.element : removed ? removed.element : 0;
       this.total += tempValue;
       let kirim = {...rivals, }
-      db.collection('rooms').doc(this.$router.params.id)
+      db.collection('rooms').doc(this.$route.params.id)
         .update({ sandbox: kirim })
     },
     clearCheck() {
@@ -113,9 +113,9 @@ export default {
       let rand = Math.round(Math.random() * (this.moneyList.length - 1));
       this.sandbox.push(this.moneyList[rand]);
     }
-    db.collection('rooms').doc(this.$router.params.id)
+    db.collection('rooms').doc(this.$route.params.id)
       .update({ sandbox: this.sandbox});
-    db.collection('rooms').doc(this.$router.params.id)
+    db.collection('rooms').doc(this.$route.params.id)
       .onSnapshot(doc => {
         let data = doc.data()
         this.rivals = Object.values(data.players)

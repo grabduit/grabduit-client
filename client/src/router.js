@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Rooms from '@/views/Rooms.vue'
+import EachRoom from '@/views/eachroom.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -25,6 +26,11 @@ export default new Router({
       path:'/rooms',
       name:'rooms',
       component:Rooms  
+    },
+    {
+      path:'/rooms/:id',
+      name:'currentRoom',
+      component:EachRoom
     }
   ]
 })

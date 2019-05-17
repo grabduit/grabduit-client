@@ -39,6 +39,7 @@
 </template>
 <script>
 import draggable from "vuedraggable";
+import { db } from "@/main.js"
 
 export default {
   data() {
@@ -78,20 +79,24 @@ export default {
       } else {
         // console.log("catch error")
       }
-      console.log(this.sandbox)
+      // console.log(this.sandbox)
+      db.collection('rooms').doc(this.$router.params.id)
+        .update({ sandbox: this.sandbox })
       if(this.clearCheck()) {
         // ======================= kalo udah kosong ngapain ? =======================
         swal('finished')
+        
       } else {
         // ======================== kalo masih isi ngapain ? ========================
       }
     },
     receive(event) {
-      // console.log({event, dari: 'receive'});
       let { added, removed, moved } = event;
       let tempValue = added ? added.element : removed ? removed.element : 0;
       this.total += tempValue;
-
+      let kirim = {...rivals, }
+      db.collection('rooms').doc(this.$router.params.id)
+        .update({ sandbox: kirim })
     },
     clearCheck() {
       let check = true
@@ -104,11 +109,20 @@ export default {
     }
   },
   created() {
-    
     for (let i = 0; i < 5; i++) {
       let rand = Math.round(Math.random() * (this.moneyList.length - 1));
       this.sandbox.push(this.moneyList[rand]);
     }
+    db.collection('rooms').doc(this.$router.params.id)
+      .update({ sandbox: this.sandbox});
+    db.collection('rooms').doc(this.$router.params.id)
+      .onSnapshot(doc => {
+        let data = doc.data()
+        this.rivals = Object.values(data.players)
+        this.rivals = this.rivals.filter(item => item.id != localStorage.playerId)
+        this.sandbox = data.sandbox
+        // console.log(this.rivals)
+      })
   }
 };
 </script>

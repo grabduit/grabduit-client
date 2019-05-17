@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Rooms from '@/views/Rooms.vue'
-import EachRoom from '@/views/eachroom.vue'
+
 Vue.use(Router)
 
 export default new Router({
@@ -23,14 +23,14 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
     },
     {
-      path:'/rooms',
-      name:'rooms',
-      component:Rooms  
+      path: '/rooms',
+      name: 'rooms',
+      component: Rooms
     },
     {
-      path:'/rooms/:id',
-      name:'currentRoom',
-      component:EachRoom
+      path: '/games/:id',
+      name: 'game',
+      component: () => import(/* webpackChunkName: "about" */ './views/Game.vue')
     }
   ]
 })

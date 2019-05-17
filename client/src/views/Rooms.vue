@@ -59,7 +59,7 @@ export default {
   created() {
     console.log(db);
     if(!localStorage.getItem('playerId')){
-      // this.$router.push(`/`)
+      this.$router.push(`/`)
     }
     db.collection("rooms").onSnapshot(querySnapshot => {
       this.rooms = [];

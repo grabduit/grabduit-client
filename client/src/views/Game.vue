@@ -192,7 +192,7 @@ export default {
     }
   },
   created() {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 84; i++) {
       let rand = Math.round(Math.random() * (this.moneyList.length - 1));
       this.sandbox.push(this.moneyList[rand]);
     }

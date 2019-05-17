@@ -5,18 +5,18 @@
         <b-card-text v-for='(player,index) in players' :key="index">
             player{{index+1}}:{{player}} <b v-if="player === room.creator">(admin)</b>
         </b-card-text>
-        <button v-if="isAdmin" class='mx-1' @click="start">Start</button>
-        <button v-if='available' class='mx-1' @click="join">Join</button>
-        <button class='mx-1'  @click="leave">Leave</button>
+        <b-button v-if="isAdmin" class='mx-1' @click="start">Start</b-button>
+        <b-button v-if='available' class='mx-1' @click="join">Join</b-button>
+        <b-button class='mx-1'  @click="leave">Leave</b-button>
     </b-card>
     <b-card v-else :title='room.title' :sub-title="room.status">
         {{playerNumbers}}
         <b-card-text v-for='(player,index) in players' :key="index">
             player{{index+1}}:{{player}} <b v-if="player === room.creator">(admin)</b>
         </b-card-text>
-        <button v-if="isAdmin" class='mx-1' @click="start">Start</button>
-        <button v-if='available' class='mx-1' @click="join">Join</button>
-        <button class='mx-1' v-if="Object.keys(room.players).includes(playerId)" @click="leave">Leave</button>
+        <b-button v-if="isAdmin" class='mx-1' @click="start">Start</b-button>
+        <b-button v-if='available' class='mx-1' @click="join">Join</b-button>
+        <b-button class='mx-1' v-if="Object.keys(room.players).includes(playerId)" @click="leave">Leave</b-button>
     </b-card>
 </div>
 </template>

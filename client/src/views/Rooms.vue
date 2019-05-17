@@ -10,7 +10,7 @@
     </div>
     <div v-if="available">
       <input placeholder="Room Name" v-model="roomName" class="my-4 mx-3">
-      <button @click="createRoom" class="mb-4">create Room</button>
+      <b-button @click="createRoom" class="mb-4">create Room</b-button>
     </div>
     <div style="height:100vh; background-color:#F4FD7F">
       <div class="container">
